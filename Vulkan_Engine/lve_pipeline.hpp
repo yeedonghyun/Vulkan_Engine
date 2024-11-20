@@ -6,21 +6,34 @@
 
 namespace lve {
 
-	struct PipeLindeConfigInfo	{	};
+	struct PipelineConfigInfo {
+		VkViewport viewport;
+		VkRect2D scissor;
+		VkPipelineViewportStateCreateInfo viewportInfo;
+		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+		VkPipelineMultisampleStateCreateInfo multisampleInfo;
+		VkPipelineColorBlendAttachmentState colorBlendAttachment;
+		VkPipelineColorBlendStateCreateInfo colorBlendInfo;
+		VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+		VkPipelineLayout pipelineLayout = nullptr;
+		VkRenderPass renderPass = nullptr;
+		uint32_t subpass = 0;
+	};
 
 	class LvePipeline {
 	public:
 		//shader 경로 받아서 shader 파일 읽고 테스트 하고 디바이스 초기화
 		LvePipeline(LveDevice&device, const std::string &vertFilePath, 
-			const std::string& fragFilePath, const PipeLindeConfigInfo configInfo);
-		~LvePipeline() {}
+			const std::string& fragFilePath, const PipelineConfigInfo configInfo);
+		~LvePipeline();
 
 		//동시선언 방지
 		LvePipeline(const LvePipeline&) = delete;
 		void operator=(const LvePipeline&) = delete;
 
-		//초반이라 PipeLindeConfigInfo 생성하고 PipeLindeConfigInfo리턴 (나중에 안에들어갈 정보들을 추가)
-		static PipeLindeConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
+		//PipelineConfigInfo 생성하고 Pipeline 구성 설정
+		static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
 
 	private:
 		//파일을 읽고 성공했다면 vector<char> 파일 정보를 리턴
@@ -28,7 +41,7 @@ namespace lve {
 		static std::vector<char> readFile(const std::string& filePath);
 
 		//shader 파일 읽는 함수(파일을 읽고 테스트 하는 부분만 구현됨)
-		void createGraphicsPipeline(const std::string& vertFilePath, const std::string& fragFilePath, const PipeLindeConfigInfo configInfo);
+		void createGraphicsPipeline(const std::string& vertFilePath, const std::string& fragFilePath, const PipelineConfigInfo configInfo);
 
 		//shader module 생성
 		void createShaderModule(const std::vector<char> code, VkShaderModule* shaderModule);
