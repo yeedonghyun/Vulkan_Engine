@@ -1,5 +1,6 @@
 #include "lve_window.hpp"
 
+#include <stdexcept>
 namespace lve {
 
 	//멤버변수 초기화
@@ -11,6 +12,13 @@ namespace lve {
 	LveWindow::~LveWindow() {
 		glfwDestroyWindow(window);
 		glfwTerminate();
+	}
+
+	void LveWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
+	{
+		if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {
+			throw std::runtime_error("윈도우 surface 생성 실패");
+		}
 	}
 
 	void LveWindow::initWindow() {

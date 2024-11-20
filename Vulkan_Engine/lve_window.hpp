@@ -1,6 +1,6 @@
 #pragma once
 
-#define GLFW_INCLUE_VULKAN
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <string>
@@ -17,6 +17,8 @@ namespace lve {
 
 		//Ã¢´ÝÈû È®ÀÎÇÔ¼ö
 		bool shouldClose() { return glfwWindowShouldClose(window); };
+
+		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
 	private:
 		void initWindow();
