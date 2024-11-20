@@ -9,7 +9,6 @@ namespace lve {
 	struct PipelineConfigInfo {
 		VkViewport viewport;
 		VkRect2D scissor;
-		VkPipelineViewportStateCreateInfo viewportInfo;
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
 		VkPipelineMultisampleStateCreateInfo multisampleInfo;
@@ -31,6 +30,8 @@ namespace lve {
 		//동시선언 방지
 		LvePipeline(const LvePipeline&) = delete;
 		void operator=(const LvePipeline&) = delete;
+
+		void bind(VkCommandBuffer commandBuffer);
 
 		//PipelineConfigInfo 생성하고 Pipeline 구성 설정
 		static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);

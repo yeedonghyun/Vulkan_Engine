@@ -20,6 +20,8 @@ namespace lve {
 
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
+		//윈도우 창의 크기 리턴
+		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
 	private:
 		void initWindow();
 
