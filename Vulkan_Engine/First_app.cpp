@@ -25,9 +25,11 @@ namespace lve {
 
     //모델을 로드
     //현재는 삼각형
-    void FirstApp::loadModels()
-    {
-        std::vector<LveModel::Vertex> vertices{ {{0.0f, -0.5f}}, {{0.5f, 0.5f}}, {{-0.5f, 0.5f}} };
+    void FirstApp::loadModels() {
+        std::vector<LveModel::Vertex> vertices{
+            {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}} };
         lveModel = std::make_unique<LveModel>(lveDevice, vertices);
     }
 
