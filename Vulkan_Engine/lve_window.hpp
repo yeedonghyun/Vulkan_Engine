@@ -17,17 +17,21 @@ namespace lve {
 
 		//창닫힘 확인함수
 		bool shouldClose() { return glfwWindowShouldClose(window); };
+		//윈도우 창의 크기 리턴
+		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
+		bool wasWindowResized() { return framebufferResized; }
+		void resetWindowResizeFlag() { framebufferResized = false; }
 
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
-		//윈도우 창의 크기 리턴
-		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
 	private:
+		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 		void initWindow();
 
 		//윈도우 크기
-		const int width;
-		const int height;
+		int width;
+		int height;
+		bool framebufferResized = false;
 
 		//이름
 		std::string windowName;

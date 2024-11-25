@@ -33,3 +33,5 @@
 /.vs
 /Vulkan_Engine/x64
 /libs/VulkanSDK
+/x64/Debug
+/x64

@@ -13,6 +13,17 @@ namespace lve {
     //스왑체인 생성 및 리소스 초기화
     LveSwapChain::LveSwapChain(LveDevice& deviceRef, VkExtent2D extent)
         : device{ deviceRef }, windowExtent{ extent } {
+        init();
+    }
+
+    LveSwapChain::LveSwapChain(
+        LveDevice& deviceRef, VkExtent2D extent, std::shared_ptr<LveSwapChain> previous)
+        : device{ deviceRef }, windowExtent{ extent }, oldSwapChain{ previous } {
+        init();
+        oldSwapChain = nullptr;
+    }
+
+    void LveSwapChain::init() {
         createSwapChain();
         createImageViews();
         createRenderPass();
@@ -65,7 +76,7 @@ namespace lve {
             device.device(),
             swapChain,
             std::numeric_limits<uint64_t>::max(),
-            imageAvailableSemaphores[currentFrame],
+            imageAvailableSemaphores[currentFrame],  // must be a not signaled semaphore
             VK_NULL_HANDLE,
             imageIndex);
 
@@ -73,8 +84,7 @@ namespace lve {
     }
 
     //커맨드 버퍼를 GPU 큐에 제출하고 이미지를 화면에 표시
-    VkResult LveSwapChain::submitCommandBuffers(
-        const VkCommandBuffer* buffers, uint32_t* imageIndex) {
+    VkResult LveSwapChain::submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) {
         if (imagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
             vkWaitForFences(device.device(), 1, &imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
         }
@@ -116,7 +126,7 @@ namespace lve {
 
         presentInfo.pImageIndices = imageIndex;
 
-        //이미지를 화면에 표시        
+        //이미지를 화면에 표시  
         auto result = vkQueuePresentKHR(device.presentQueue(), &presentInfo);
 
         //순환적으로 업데이트하며 프레임 관리
@@ -166,8 +176,8 @@ namespace lve {
         }
         else {
             createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            createInfo.queueFamilyIndexCount = 0;
-            createInfo.pQueueFamilyIndices = nullptr;
+            createInfo.queueFamilyIndexCount = 0;      
+            createInfo.pQueueFamilyIndices = nullptr;  
         }
 
         createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
@@ -176,7 +186,7 @@ namespace lve {
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
 
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
+        createInfo.oldSwapchain = oldSwapChain == nullptr ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
         //스왑체인 생성에 실패하면 오류메세지
         if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
@@ -409,12 +419,12 @@ namespace lve {
     //예를들어 렌더링이 끝나면 바로 화면에표시 하거나
     //gpu 큐 버퍼에 저장하고 순차적으로 표시하거나
     VkPresentModeKHR LveSwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
-        //for (const auto &availablePresentMode : availablePresentModes) {
-        //    if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-        //        std::cout << "Present mode: Mailbox" << std::endl;
-        //        return availablePresentMode;
-        //    }
-        //}
+        for (const auto &availablePresentMode : availablePresentModes) {
+            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+                std::cout << "Present mode: Mailbox" << std::endl;
+                return availablePresentMode;
+            }
+        }
 
         // for (const auto &availablePresentMode : availablePresentModes) {
         //   if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
