@@ -1,5 +1,7 @@
 #include "lve_pipeline.hpp"
 
+#include "lve_model.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -25,14 +27,17 @@ namespace lve {
     //실패했다면 throw 
     std::vector<char> LvePipeline::readFile(const std::string& filepath) {
         std::ifstream file{ filepath, std::ios::ate | std::ios::binary };
+
         if (!file.is_open()) {
             throw std::runtime_error("failed to open file: " + filepath);
         }
+
         size_t fileSize = static_cast<size_t>(file.tellg());
         std::vector<char> buffer(fileSize);
         file.seekg(0);
         file.read(buffer.data(), fileSize);
         file.close();
+
         return buffer;
     }
 
@@ -74,12 +79,15 @@ namespace lve {
         shaderStages[1].pSpecializationInfo = nullptr;
 
         //vertex 데이터 처리방식 설정
+        auto attributeDescrptions = LveModel::Vertex::getAttributeDescriptions();
+        auto bindingDescriptions = LveModel::Vertex::getBindingDescriptions();
+
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexAttributeDescriptionCount = 0;
-        vertexInputInfo.vertexBindingDescriptionCount = 0;
-        vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-        vertexInputInfo.pVertexBindingDescriptions = nullptr;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescrptions.size());
+        vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());;
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescrptions.data();
+        vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 
         VkPipelineViewportStateCreateInfo viewportInfo{};
         viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

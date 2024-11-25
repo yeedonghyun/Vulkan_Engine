@@ -6,6 +6,7 @@
 
 namespace lve {
     FirstApp::FirstApp() {
+        loadModels();
         createPipelineLayout();
         createPipeline();
         createCommandBuffers();
@@ -13,6 +14,7 @@ namespace lve {
 
     FirstApp::~FirstApp() { vkDestroyPipelineLayout(lveDevice.device(), pipelineLayout, nullptr); }
 
+    //매 프레임 실행
     void FirstApp::run() {
         while (!lveWindow.shouldClose()) {
             glfwPollEvents();
@@ -21,6 +23,15 @@ namespace lve {
         vkDeviceWaitIdle(lveDevice.device());
     }
 
+    //모델을 로드
+    //현재는 삼각형
+    void FirstApp::loadModels()
+    {
+        std::vector<LveModel::Vertex> vertices{ {{0.0f, -0.5f}}, {{0.5f, 0.5f}}, {{-0.5f, 0.5f}} };
+        lveModel = std::make_unique<LveModel>(lveDevice, vertices);
+    }
+
+    //파이프 라인 레이아웃을 생성
     void FirstApp::createPipelineLayout() {
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -33,6 +44,7 @@ namespace lve {
         }
     }
 
+    //파이프라인을 생성 및 컴파일된 shader 파일 바인드
     void FirstApp::createPipeline() {
         auto pipelineConfig = LvePipeline::defaultPipelineConfigInfo(lveSwapChain.width(), lveSwapChain.height());
         pipelineConfig.renderPass = lveSwapChain.getRenderPass();
@@ -44,6 +56,7 @@ namespace lve {
             pipelineConfig);
     }
 
+    //gpu 명령버퍼 생성
     void FirstApp::createCommandBuffers() {
         commandBuffers.resize(lveSwapChain.imageCount());
         VkCommandBufferAllocateInfo allocInfo{};
@@ -51,10 +64,12 @@ namespace lve {
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandPool = lveDevice.getCommandPool();
         allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
+
         if (vkAllocateCommandBuffers(lveDevice.device(), &allocInfo, commandBuffers.data()) !=
             VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
+
         for (int i = 0; i < commandBuffers.size(); i++) {
             VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -73,14 +88,19 @@ namespace lve {
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
             lvePipeline->bind(commandBuffers[i]);
-            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+            lveModel->bind(commandBuffers[i]);
+            lveModel->draw(commandBuffers[i]);
+
             vkCmdEndRenderPass(commandBuffers[i]);
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to record command buffer!");
             }
         }
     }
+
+    //삼각형 렌더링
     void FirstApp::drawFrame() {
         uint32_t imageIndex;
         auto result = lveSwapChain.acquireNextImage(&imageIndex);
