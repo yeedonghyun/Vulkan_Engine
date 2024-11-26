@@ -36,5 +36,4 @@ namespace lve {
 		lveWindow->width = width;
 		lveWindow->height = height;
 	}
-
 }
