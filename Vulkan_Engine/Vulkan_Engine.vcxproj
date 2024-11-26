@@ -153,6 +153,7 @@
     <ClCompile Include="lve_device.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lve_game_object.hpp" />
     <ClInclude Include="lve_model.hpp" />
     <ClInclude Include="lve_pipeline.hpp" />
     <ClInclude Include="lve_swap_chain.hpp" />

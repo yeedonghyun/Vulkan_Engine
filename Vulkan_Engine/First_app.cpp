@@ -3,6 +3,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm.hpp>
+#include <../glm/gtc/constants.hpp>
 
 #include <array>
 #include <stdexcept>
@@ -11,12 +12,13 @@ namespace lve {
 
     //ConstanData
     struct SimplePushConstanData {
+        glm::mat2 transform{ 1.f };
         glm::vec2 offset;
         alignas(16) glm::vec3 color;
     };
 
     FirstApp::FirstApp() {
-        loadModels();
+        loadgameObject();
         createPipelineLayout();
         recreateSwapChain();
         createCommandBuffers();
@@ -34,13 +36,23 @@ namespace lve {
     }
 
     //모델을 로드
-    //현재는 삼각형
-    void FirstApp::loadModels() {
+    //현재는 삼각형 및 색상지정
+    void FirstApp::loadgameObject() {
         std::vector<LveModel::Vertex> vertices{
             {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
             {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
             {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}} };
-        lveModel = std::make_unique<LveModel>(lveDevice, vertices);
+
+        auto lveModel = std::make_shared<LveModel>(lveDevice, vertices);
+
+        auto triangle = LveGameObject::createGameObject();
+        triangle.model = lveModel;
+        triangle.color = { 0.1f, 0.8f, 0.1f };
+        triangle.transform2d.translation.x = 0.2f;
+        triangle.transform2d.scale = { 2.f, 0.5f };
+        triangle.transform2d.rotation = 0.25f * glm::two_pi<float>();
+
+        gameObject.push_back(std::move(triangle));
     }
 
     //파이프 라인 레이아웃을 생성
@@ -119,6 +131,7 @@ namespace lve {
         }
     }
 
+    //command buffer 들 해제
     void FirstApp::freeCommandBuffers() {
         vkFreeCommandBuffers(
             lveDevice.device(),
@@ -167,28 +180,36 @@ namespace lve {
         vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
         vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-        lvePipeline->bind(commandBuffers[imageIndex]);
-        lveModel->bind(commandBuffers[imageIndex]);
-
-        for (int j = 0; j < 4; j++) {
-            SimplePushConstanData push{};
-            push.offset = { -0.5f + frame * 0.00002f, -0.4f + j * 0.25f };
-            push.color = { 0.0f, 0.2f + 0.2f * j , 0.0f};
-
-            vkCmdPushConstants(
-                commandBuffers[imageIndex], 
-                pipelineLayout, 
-                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
-                0, 
-                sizeof(SimplePushConstanData), 
-                &push);
-
-            lveModel->draw(commandBuffers[imageIndex]);
-        }
+        renderGameObject(commandBuffers[imageIndex]);
 
         vkCmdEndRenderPass(commandBuffers[imageIndex]);
         if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
             throw std::runtime_error("failed to record command buffer!");
+        }
+    }
+
+    //obj 별 바인딩 후 드로우
+    void FirstApp::renderGameObject(VkCommandBuffer commandBuffer)
+    {
+        lvePipeline->bind(commandBuffer);
+
+        for (auto& obj : gameObject) {
+            obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.0001f, glm::two_pi<float>());
+
+            SimplePushConstanData push{};
+            push.offset = obj.transform2d.translation;
+            push.color = obj.color;
+            push.transform = obj.transform2d.mat2();
+
+            vkCmdPushConstants(
+                commandBuffer,
+                pipelineLayout,
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                0,
+                sizeof(SimplePushConstanData),
+                &push);
+            obj.model->bind(commandBuffer);
+            obj.model->draw(commandBuffer);
         }
     }
 

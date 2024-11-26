@@ -59,6 +59,9 @@
     <ClInclude Include="lve_model.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="lve_game_object.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\simple_shader.frag">

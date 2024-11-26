@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lve_device.hpp"
-#include "lve_window.hpp"
+#include "lve_game_object.hpp"
 #include "lve_swap_chain.hpp"
 #include "lve_pipeline.hpp"
 #include "lve_model.hpp"
@@ -26,7 +26,7 @@ namespace lve {
 		void run();
 
 	private:
-		void loadModels();
+		void loadgameObject();
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
@@ -34,6 +34,7 @@ namespace lve {
 		void drawFrame();
 		void recreateSwapChain();
 		void recordCommandBuffer(int imageIndex);
+		void renderGameObject(VkCommandBuffer commandBuffer);
 
 		//생성자를 사용해서 윈도우창 초기화
 		LveWindow lveWindow{WIDTH, HEIGHT, "Hi Vulkan"};
@@ -43,6 +44,6 @@ namespace lve {
 		std::unique_ptr<LvePipeline> lvePipeline;
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffers;
-		std::unique_ptr<LveModel> lveModel;
+		std::vector<LveGameObject> gameObject;
 	};
 }
