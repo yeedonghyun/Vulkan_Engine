@@ -68,9 +68,11 @@ namespace lve {
             pipelineConfig);
     }
 
-    void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<LveGameObject>& gameObjects) {
+    void SimpleRenderSystem::renderGameObjects(
+        VkCommandBuffer commandBuffer, std::vector<LveGameObject>& gameObjects, const LveCamera& camera) {
         //파이프라인 활성화
         lvePipeline->bind(commandBuffer);
+        auto projectionView = camera.getProjection() * camera.getView();
 
         //오브젝트별 렌더링
         for (auto& obj : gameObjects) {
@@ -80,7 +82,7 @@ namespace lve {
 
             SimplePushConstantData push{};
             push.color = obj.color;
-            push.transform = obj.transform.mat4();
+            push.transform = projectionView * obj.transform.mat4();
 
             //상수 버퍼를 GPU에 전달
             vkCmdPushConstants(
