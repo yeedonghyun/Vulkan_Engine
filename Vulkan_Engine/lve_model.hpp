@@ -12,7 +12,7 @@ namespace lve {
 
 		//vertex ±¸Á¶Ã¼
 		struct Vertex {
-			glm::vec2 position;
+			glm::vec3 position;
 			glm::vec3 color;
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
@@ -35,8 +35,5 @@ namespace lve {
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
 		uint32_t vertexCount;
-
-	public:
-
 	};
 }
