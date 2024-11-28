@@ -1,5 +1,6 @@
 #include "first_app.hpp"
 
+#include "keyboard_movement_controller.hpp"
 #include "lve_camera.hpp"
 #include "simple_render_system.hpp"
 
@@ -8,6 +9,7 @@
 #include <glm.hpp>
 #include <../glm/gtc/constants.hpp>
 
+#include <chrono>
 #include <array>
 #include <stdexcept>
 
@@ -23,12 +25,31 @@ namespace lve {
 
         SimpleRenderSystem simpleRenderSystem{ lveDevice, lveRenderer.getSwapChainRenderPass() };
         LveCamera camera{};
-        camera.setViewTarget(glm::vec3(-1.f, -2.f, -2.f), glm::vec3(0.f, 0.f, 2.5f));
+
+        //카메라의 위치, 바라보는 방향, 카메라의 윗부분의 방향
+        camera.setViewTarget(glm::vec3(-1.f, -2.f, -0.2f), glm::vec3(0.f, 0.f, 2.5f));
+
+        auto viewerObject = LveGameObject::createGameObject();
+        KeyboardMovementController cameraController{};
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
 
         while (!lveWindow.shouldClose()) {
             glfwPollEvents();
 
+            auto newTime = std::chrono::high_resolution_clock::now();
+            float frameTime =
+                std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+            currentTime = newTime;
+
+
+            cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, viewerObject);
+            camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+
             float aspect = lveRenderer.getAspectRatio();
+
+            //뷰프러스텀 을 정의하기 위한 파라미터
+            //Fov, 종횡비, near, far
             camera.setPerspectiveProjection(glm::radians(120.f), aspect, 0.1f, 100.f);
 
             if (auto commandBuffer = lveRenderer.beginFrame()) {
@@ -40,6 +61,7 @@ namespace lve {
         }
         vkDeviceWaitIdle(lveDevice.device());
     }
+
     std::unique_ptr<LveModel> createCubeModel(LveDevice& device, glm::vec3 offset) {
         std::vector<LveModel::Vertex> vertices{
         // left face (white)
