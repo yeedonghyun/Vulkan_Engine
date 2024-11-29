@@ -14,8 +14,7 @@ namespace lve {
     //오브젝트 위치, 회전, 크기
     struct SimplePushConstantData {
         glm::mat4 transform{ 1.f };
-        //16바이트 정렬
-        alignas(16) glm::vec3 color;
+        glm::mat4 normalMatrix{ 1.f };
     };
 
     SimpleRenderSystem::SimpleRenderSystem(LveDevice& device, VkRenderPass renderPass)
@@ -77,8 +76,9 @@ namespace lve {
         //오브젝트별 렌더링
         for (auto& obj : gameObjects) {
             SimplePushConstantData push{};
-            push.color = obj.color;
-            push.transform = projectionView * obj.transform.mat4();
+            auto modelMatrix = obj.transform.mat4();
+            push.transform = projectionView * modelMatrix;
+            push.normalMatrix = obj.transform.normalMatrix();
 
             //상수 버퍼를 GPU에 전달
             vkCmdPushConstants(

@@ -26,11 +26,9 @@ namespace lve {
         SimpleRenderSystem simpleRenderSystem{ lveDevice, lveRenderer.getSwapChainRenderPass() };
         LveCamera camera{};
 
-        //카메라의 위치, 바라보는 방향, 카메라의 윗부분의 방향
-        camera.setViewTarget(glm::vec3(-1.f, -2.f, -0.2f), glm::vec3(0.f, 0.f, 0.5f));
-
         auto viewerObject = LveGameObject::createGameObject();
         KeyboardMovementController cameraController{};
+        viewerObject.transform.translation = glm::vec3(0.f, -0.05f, -0.15f);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -41,7 +39,6 @@ namespace lve {
             float frameTime =
                 std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
             currentTime = newTime;
-
 
             cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, viewerObject);
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
@@ -64,10 +61,10 @@ namespace lve {
 
     //모델을 로드
     void FirstApp::loadgameObject() {
-        std::shared_ptr<LveModel> lveModel = LveModel::createModelFromFile(lveDevice, "models/smooth_vase.obj");
+        std::shared_ptr<LveModel> lveModel = LveModel::createModelFromFile(lveDevice, "models/flat_vase.obj");
         auto gameObjcect = LveGameObject::createGameObject();
         gameObjcect.model = lveModel;
-        gameObjcect.transform.translation = { .0f, .0f, 1.5f };
+        gameObjcect.transform.translation = { .0f, .0f, 1.f };
         gameObjcect.transform.scale = glm::vec3{ 3.f };
         gameObjects.push_back(std::move(gameObjcect));
     }

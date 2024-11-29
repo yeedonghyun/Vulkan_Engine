@@ -31,11 +31,8 @@
 *.out
 *.app
 /.vs
-/Vulkan_Engine/x64
 /libs/VulkanSDK
-/x64/Debug
-/x64
-Vulkan_Engine/Shaders/simple_shader.frag.spv
-Vulkan_Engine/Shaders/simple_shader.vert.spv
-/x64
+/Vulkan_Engine/x64
+/Vulkan_Engine/Shaders/simple_shader.vert.spv
+/Vulkan_Engine/Shaders/simple_shader.vert.spv
 /x64
