@@ -29,14 +29,6 @@ namespace lve {
 	}
 
 	LveModel::~LveModel() {
-		//버퍼와 메모리 해제
-		vkDestroyBuffer(lveDevice.device(), vertexBuffer, nullptr);
-		vkFreeMemory(lveDevice.device(), vertexBufferMemory, nullptr);
-
-		if (hasIndexBuffer) {
-			vkDestroyBuffer(lveDevice.device(), indexBuffer, nullptr);
-			vkFreeMemory(lveDevice.device(), indexBufferMemory, nullptr);
-		}
 	}
 
 	//버퍼 생성 및 메모리 할당
@@ -45,35 +37,29 @@ namespace lve {
 		//vertex 개수
 		vertexCount = static_cast<uint32_t>(verticse.size());
 		assert(vertexCount >= 3 && "Vertex count must be at least 3");
-		VkDeviceSize bufferSize = sizeof(verticse[0]) * vertexCount;
+		uint32_t vertexSize = sizeof(verticse[0]);
+		VkDeviceSize bufferSize = vertexSize * vertexCount;
 		
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-
-		//정점 버퍼 생성
-		lveDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		LveBuffer stagingBuffer{
+			lveDevice,
+			vertexSize,
+			vertexCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer,
-			stagingBufferMemory);
+		};
 
-		void* data;
-		//Cpu 와 Gpu 연결
-		vkMapMemory(lveDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		//버퍼 카피
-		memcpy(data, verticse.data(), static_cast<size_t>(bufferSize));
-		//연결 해제
-		vkUnmapMemory(lveDevice.device(), stagingBufferMemory);
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)verticse.data());
 
-		lveDevice.createBuffer(
-			bufferSize,
+		vertexBuffer = std::make_unique<LveBuffer>(
+			lveDevice,
+			vertexSize,
+			vertexCount,
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			vertexBuffer,
-			vertexBufferMemory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+		);
 
-		lveDevice.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-		vkDestroyBuffer(lveDevice.device(), stagingBuffer, nullptr);
-		vkFreeMemory(lveDevice.device(), stagingBufferMemory, nullptr);
+		lveDevice.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
 	}
 
 	void LveModel::createIndexBuffers(const std::vector<uint32_t>& indices)
@@ -85,35 +71,29 @@ namespace lve {
 			return;
 		}
 
-		VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
+		uint32_t indexSize = sizeof(indices[0]);
+		VkDeviceSize bufferSize = indexSize * indexCount;
 
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-
-		//정점 버퍼 생성
-		lveDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		LveBuffer stagingBuffer{
+			lveDevice,
+			indexSize,
+			indexCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer,
-			stagingBufferMemory);
+		};
 
-		void* data;
-		//Cpu 와 Gpu 연결
-		vkMapMemory(lveDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		//버퍼 카피
-		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-		//연결 해제
-		vkUnmapMemory(lveDevice.device(), stagingBufferMemory);
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)indices.data());
 
-		lveDevice.createBuffer(
-			bufferSize,
+		indexBuffer = std::make_unique<LveBuffer>(
+			lveDevice,
+			indexSize,
+			indexCount,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			indexBuffer,
-			indexBufferMemory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+		);
 
-		lveDevice.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
-		vkDestroyBuffer(lveDevice.device(), stagingBuffer, nullptr);
-		vkFreeMemory(lveDevice.device(), stagingBufferMemory, nullptr);
+		lveDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
 	}
 
 	std::unique_ptr<LveModel> LveModel::createModelFromFile(LveDevice& device, const std::string& filepath)	{
@@ -125,12 +105,12 @@ namespace lve {
 	//정점 버퍼를 명령버퍼에 바인딩 (변경할수 없도록)
 	void LveModel::bind(VkCommandBuffer CommandBuffer)
 	{
-		VkBuffer buffers[] = { vertexBuffer };
+		VkBuffer buffers[] = { vertexBuffer->getBuffer()};
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, buffers, offsets);
 
 		if (hasIndexBuffer) {
-			vkCmdBindIndexBuffer(CommandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdBindIndexBuffer(CommandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		}
 	}
 
