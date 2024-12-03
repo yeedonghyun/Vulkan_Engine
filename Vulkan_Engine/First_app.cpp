@@ -19,7 +19,10 @@ namespace lve {
 
     struct GlobalUbo {
         glm::mat4 projectionView{ 1.f };
-        glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+
+        glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f };
+        glm::vec3 lightPosition{ -1.f };
+        alignas(16)glm::vec4 lightColor{ 1.f };
     };
 
     FirstApp::FirstApp() {
@@ -27,7 +30,7 @@ namespace lve {
             .setMaxSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT)
             .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
             .build();
-        loadgameObject();
+        loadGameObject();
     }
 
     FirstApp::~FirstApp() {  }
@@ -64,7 +67,7 @@ namespace lve {
 
         auto viewerObject = LveGameObject::createGameObject();
         KeyboardMovementController cameraController{};
-        viewerObject.transform.translation = glm::vec3(0.f, -0.05f, -0.15f);
+        viewerObject.transform.translation = glm::vec3(0.f, -0.5f, -1.15f);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -111,12 +114,18 @@ namespace lve {
     }
 
     //¸ðµ¨À» ·Îµå
-    void FirstApp::loadgameObject() {
-        std::shared_ptr<LveModel> lveModel = LveModel::createModelFromFile(lveDevice, "models/flat_vase.obj");
-        auto gameObjcect = LveGameObject::createGameObject();
-        gameObjcect.model = lveModel;
-        gameObjcect.transform.translation = { .0f, .0f, 1.f };
-        gameObjcect.transform.scale = glm::vec3{ 3.f };
-        gameObjects.push_back(std::move(gameObjcect));
+    void FirstApp::loadGameObject() {
+        std::shared_ptr<LveModel> lveModel =
+            LveModel::createModelFromFile(lveDevice, "models/smooth_vase.obj");
+        auto flatVase = LveGameObject::createGameObject();
+        flatVase.model = lveModel;
+        flatVase.transform.translation = { -1.5f, .5f, 0.f };
+        gameObjects.push_back(std::move(flatVase));
+
+        lveModel = LveModel::createModelFromFile(lveDevice, "models/quad.obj");
+        auto floor = LveGameObject::createGameObject();
+        floor.model = lveModel;
+        floor.transform.translation = { 0.f, .5f, 0.f };
+        gameObjects.push_back(std::move(floor));
     }
 }

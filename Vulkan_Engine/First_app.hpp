@@ -26,7 +26,7 @@ namespace lve {
 		void run();
 
 	private:
-		void loadgameObject();
+		void loadGameObject();
 
 		//생성자를 사용해서 윈도우창 초기화
 		LveWindow lveWindow{WIDTH, HEIGHT, "Hi Vulkan"};
