@@ -157,7 +157,8 @@
     <ClCompile Include="lve_window.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="lve_device.cpp" />
-    <ClCompile Include="simple_render_system.cpp" />
+    <ClCompile Include="systems\point_light_system.cpp" />
+    <ClCompile Include="systems\simple_render_system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyboard_movement_controller.hpp" />
@@ -173,10 +174,13 @@
     <ClInclude Include="lve_utils.hpp" />
     <ClInclude Include="lve_window.hpp" />
     <ClInclude Include="lve_device.hpp" />
-    <ClInclude Include="simple_render_system.hpp" />
+    <ClInclude Include="systems\point_light_system.hpp" />
+    <ClInclude Include="systems\simple_render_system.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\compile_shader.bat" />
+    <None Include="Shaders\point_light.frag" />
+    <None Include="Shaders\point_light.vert" />
     <None Include="Shaders\simple_shader.frag" />
     <None Include="Shaders\simple_shader.vert" />
   </ItemGroup>
