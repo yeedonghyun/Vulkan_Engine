@@ -71,7 +71,7 @@ namespace lve {
             pipelineConfig);
     }
 
-    void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<LveGameObject>& gameObjects) {
+    void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
         //파이프라인 활성화
         lvePipeline->bind(frameInfo.commandBuffer);
 
@@ -86,12 +86,13 @@ namespace lve {
             nullptr);
 
         //오브젝트별 렌더링
-        for (auto& obj : gameObjects) {
+        for (auto& kv : frameInfo.gameObject) {
+            auto& obj = kv.second;
+            if (obj.model == nullptr) continue;
             SimplePushConstantData push{};
             push.modelMatrix = obj.transform.mat4();
             push.normalMatrix = obj.transform.normalMatrix();
 
-            //상수 버퍼를 GPU에 전달
             vkCmdPushConstants(
                 frameInfo.commandBuffer,
                 pipelineLayout,
@@ -99,10 +100,7 @@ namespace lve {
                 0,
                 sizeof(SimplePushConstantData),
                 &push);
-
-            //오브젝트 데이터 바인딩
             obj.model->bind(frameInfo.commandBuffer);
-            //오브젝트 그리기
             obj.model->draw(frameInfo.commandBuffer);
         }
     }
