@@ -45,9 +45,6 @@
     <ClCompile Include="lve_renderer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="simple_render_system.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="lve_camera.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -61,6 +58,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="lve_descriptors.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="systems\point_light_system.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="systems\simple_render_system.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,9 +89,6 @@
     <ClInclude Include="lve_renderer.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="simple_render_system.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="lve_camera.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -107,6 +107,12 @@
     <ClInclude Include="lve_descriptors.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="systems\point_light_system.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="systems\simple_render_system.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\simple_shader.frag">
@@ -116,6 +122,12 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Shaders\compile_shader.bat">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\point_light.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\point_light.frag">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

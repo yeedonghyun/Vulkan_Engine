@@ -36,3 +36,4 @@
 /Vulkan_Engine/Shaders/simple_shader.vert.spv
 /Vulkan_Engine/Shaders/simple_shader.vert.spv
 /x64
+*.spv
